@@ -14,7 +14,7 @@ namespace PremierInsight.Data
             _httpClient = httpClient;
             // It will read from environment variable if set, or use fallback
             _apiKey = Environment.GetEnvironmentVariable("FOOTBALL_DATA_API_KEY")
-                      ?? "8f06bf64d29d456aa46bef33945f8e6e"; // your API key
+                      ?? "8f06bf64d29d456aa46bef33945f8e6e"; // My API KEY 
         }
 
         // Get Premier League standings
@@ -69,7 +69,7 @@ namespace PremierInsight.Data
                         AwayTeam = match.GetProperty("awayTeam").GetProperty("name").GetString() ?? "N/A",
                         MatchDate = match.GetProperty("utcDate").GetDateTime(),
                         Matchday = match.GetProperty("matchday").GetInt32()
-                    });
+                    }); // Fixture standing 
                 }
             }
 
