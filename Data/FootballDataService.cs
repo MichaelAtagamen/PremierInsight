@@ -1,10 +1,11 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
 using PremierInsight.Data.Models;
-// I orignally created this cs to hsot my football service API to collect the data for the league table
+
+// I originally created this cs to host my football service API to collect the data for the league table
 namespace PremierInsight.Data
 {
-    public class FootballDataService
+    public class FootballDataService : IStatsProvider
     {
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
@@ -17,12 +18,15 @@ namespace PremierInsight.Data
                       ?? "8f06bf64d29d456aa46bef33945f8e6e"; // My API KEY 
         }
 
+        // Property required by IStatsProvider
+        public string SourceName => "Football Data API";
+
         // Get Premier League standings
         public async Task<List<TeamStanding>> GetStandingsAsync()
         {
             _httpClient.DefaultRequestHeaders.Remove("X-Auth-Token");
             _httpClient.DefaultRequestHeaders.Add("X-Auth-Token", _apiKey);
-// I got this from the api football website where they gave me a token
+            // I got this from the api football website where they gave me a token
             var response = await _httpClient.GetStringAsync(
                 "https://api.football-data.org/v4/competitions/PL/standings");
 
@@ -46,7 +50,7 @@ namespace PremierInsight.Data
             return standings;
         }
 
-        //  Get upcoming Premier League fixtures
+        // Get upcoming Premier League fixtures
         public async Task<List<Fixture>> GetUpcomingFixturesAsync()
         {
             _httpClient.DefaultRequestHeaders.Remove("X-Auth-Token");
@@ -74,6 +78,23 @@ namespace PremierInsight.Data
             }
 
             return fixtures;
+        }
+
+        // Implemented interface method to test connection
+        public async Task<bool> TestConnectionAsync()
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Remove("X-Auth-Token");
+                _httpClient.DefaultRequestHeaders.Add("X-Auth-Token", _apiKey);
+
+                var response = await _httpClient.GetAsync("https://api.football-data.org/v4/competitions/PL");
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
