@@ -26,12 +26,20 @@
     {
         <div>
             <h4 class="text-info mb-3">Fantasy Premier League Players</h4>
+
             @if (players == null)
             {
                 <p>Loading player data...</p>
             }
             else
             {
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="topPlayersToggle" @bind="showTopPlayers" />
+                    <label class="form-check-label" for="topPlayersToggle">
+                        Show only Top 5 Players
+                    </label>
+                </div>
+
                 <table class="table table-hover table-bordered table-dark">
                     <thead>
                         <tr>
@@ -45,7 +53,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var p in players.OrderByDescending(p => p.total_points).Take(15))
+                        @foreach (var p in GetFilteredPlayers())
                         {
                             <tr>
                                 <td>@p.web_name</td>
@@ -142,6 +150,9 @@
     private List<Fixture>? fixtures;
     private string activeTab = "players";
 
+    // Boolean for toggle switch
+    private bool showTopPlayers = false;
+
     protected override async Task OnInitializedAsync()
     {
         var fplData = await FplService.GetFplDataAsync();
@@ -154,5 +165,15 @@
     private void SetTab(string tab)
     {
         activeTab = tab;
+    }
+
+    // Helper function for filtered player list
+    private IEnumerable<Player> GetFilteredPlayers()
+    {
+        if (players == null)
+            return Enumerable.Empty<Player>();
+
+        var sorted = players.OrderByDescending(p => p.total_points);
+        return showTopPlayers ? sorted.Take(5) : sorted.Take(15);
     }
 }
