@@ -18,7 +18,7 @@ namespace PremierInsight.Data.Models
         public int minutes { get; set; }
         public int element_type { get; set; } // 1=GK, 2=DEF, 3=MID, 4=FWD
 
-        // Handy property to show position using enum
+        //  New property that uses the enum
         public string Position => ((PlayerPosition)element_type).ToString();
     }
 
@@ -27,7 +27,7 @@ namespace PremierInsight.Data.Models
         public List<Player> elements { get; set; } = new();
     }
 
-    // Enum for C# fundamentals
+    //  Enum for player position
     public enum PlayerPosition
     {
         Goalkeeper = 1,
