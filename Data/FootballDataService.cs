@@ -36,14 +36,24 @@ namespace PremierInsight.Data
             var table = doc.RootElement.GetProperty("standings")[0].GetProperty("table");
             foreach (var t in table.EnumerateArray())
             {
+                var team = t.GetProperty("team");
+                string crest = team.TryGetProperty("crest", out var crestEl) ? (crestEl.GetString() ?? "") : "";
+
+                string? form = null;
+                if (t.TryGetProperty("form", out var formEl) && formEl.ValueKind == JsonValueKind.String)
+                    form = formEl.GetString();
+
                 standings.Add(new TeamStanding
                 {
                     Position = t.GetProperty("position").GetInt32(),
-                    TeamName = t.GetProperty("team").GetProperty("name").GetString() ?? "Unknown",
+                    TeamName = team.GetProperty("name").GetString() ?? "Unknown",
                     PlayedGames = t.GetProperty("playedGames").GetInt32(),
                     Points = t.GetProperty("points").GetInt32(),
                     GoalsFor = t.GetProperty("goalsFor").GetInt32(),
-                    GoalsAgainst = t.GetProperty("goalsAgainst").GetInt32()
+                    GoalsAgainst = t.GetProperty("goalsAgainst").GetInt32(),
+                    GoalDifference = t.GetProperty("goalDifference").GetInt32(),
+                    CrestUrl = crest,
+                    Form = form
                 });
             }
 

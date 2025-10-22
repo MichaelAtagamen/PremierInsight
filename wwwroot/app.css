@@ -60,19 +60,35 @@ h1:focus {
 }
 
 /* ================================
-   PremierInsight Dashboard Styling
+   Premier League Hub - Styling
+   Author: Michael (PremierInsight)
    ================================ */
 
+/* ---------- Base Layout ---------- */
 body {
     background-color: #0d1117;
     color: #e6edf3;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
 h1, h4 {
     color: #58a6ff;
     text-align: center;
+    font-weight: 700;
 }
 
+/* ---------- Gradient Title ---------- */
+.text-gradient {
+    font-weight: 800;
+    background: linear-gradient(90deg, #38003c 0%, #00ff85 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+}
+
+/* ---------- Navigation Tabs ---------- */
 .nav-tabs {
     border-bottom: 2px solid #30363d;
     justify-content: center;
@@ -84,52 +100,41 @@ h1, h4 {
     border: none;
     padding: 0.75rem 1.5rem;
     transition: 0.3s ease;
+    border-radius: 6px 6px 0 0;
 }
 
 .nav-tabs .nav-link:hover {
     color: #58a6ff;
     background-color: rgba(88, 166, 255, 0.1);
-    border-radius: 6px 6px 0 0;
 }
 
 .nav-tabs .nav-link.active {
     background-color: #21262d;
     color: #fff;
-    border-radius: 6px 6px 0 0;
-    border-bottom: 3px solid #58a6ff;
+    border-bottom: 3px solid #00ff85;
+    box-shadow: 0 -2px 12px rgba(0, 255, 133, 0.2);
 }
 
+/* ---------- Tables ---------- */
 .table {
     background: #161b22;
     color: #e6edf3;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
 }
 
 .table thead {
     background-color: #21262d;
     color: #79c0ff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .table-hover tbody tr:hover {
-    background-color: #1f2933;
-    transition: background-color 0.2s ease;
-}
-
-.text-info {
-    color: #79c0ff !important;
-}
-
-select.form-select {
-    background-color: #21262d;
-    color: #e6edf3;
-    border: 1px solid #30363d;
-}
-
-select.form-select:focus {
-    border-color: #58a6ff;
-    box-shadow: 0 0 0 0.2rem rgba(88, 166, 255, 0.25);
+    background-color: rgba(88, 166, 255, 0.1);
+    transition: background-color 0.25s ease;
 }
 
 .table td, .table th {
@@ -147,12 +152,112 @@ select.form-select:focus {
     padding-right: 20px;
 }
 
-/* Simple fade-in animation for tab switch */
-.tab-content > div {
-    animation: fadeIn 0.5s ease-in-out;
+/* ---------- Filters / Inputs ---------- */
+select.form-select, input.form-control {
+    background-color: #21262d;
+    color: #ffffff; /* pure white text */
+    border: 1px solid #30363d;
+    border-radius: 6px;
 }
 
+input.form-control::placeholder {
+    color: #ffffff;
+}
+
+/* Keep input text white even when typing */
+input.form-control,
+input.form-control:focus {
+    color: #ffffff !important;
+    background-color: #21262d;
+}
+
+
+select.form-select:focus, input.form-control:focus {
+    border-color: #58a6ff;
+    box-shadow: 0 0 0 0.2rem rgba(88, 166, 255, 0.25);
+    background-color: #161b22;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary {
+    background-color: #21262d;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+}
+
+.btn-secondary:hover {
+    background-color: #30363d;
+    color: #79c0ff;
+}
+
+/* ---------- Modals ---------- */
+.modal-content {
+    background: rgba(22, 27, 34, 0.95);
+    backdrop-filter: blur(6px);
+    border: 1px solid #30363d;
+    box-shadow: 0 0 20px rgba(0, 255, 133, 0.15);
+    border-radius: 12px;
+    animation: slideUp 0.3s ease-out;
+}
+
+.modal-header {
+    border-bottom: 1px solid #30363d;
+}
+
+.modal-footer {
+    border-top: 1px solid #30363d;
+}
+
+.btn-close-white {
+    filter: invert(1);
+}
+
+/* ---------- Images ---------- */
+img {
+    user-select: none;
+}
+
+img.me-2, img.me-3 {
+    border-radius: 6px;
+}
+
+/* ---------- Animations ---------- */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
+    from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-content > div {
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+/* ---------- Misc ---------- */
+.text-info {
+    color: #79c0ff !important;
+}
+
+.form-check-label {
+    color: #e6edf3;
+}
+
+@media (max-width: 768px) {
+    .table td, .table th {
+        font-size: 0.9rem;
+    }
+
+    .nav-tabs .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+    }
 }

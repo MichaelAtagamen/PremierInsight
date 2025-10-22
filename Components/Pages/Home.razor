@@ -4,7 +4,13 @@
 @inject FplService FplService
 @inject FootballDataService FootballDataService
 
-<h1 class="text-center mt-4 text-primary">PremierInsight Dashboard</h1>
+<!-- Modern Title Bar -->
+<div class="d-flex align-items-center justify-content-center mt-4 mb-2">
+    <img src="https://pngdownload.io/wp-content/uploads/2023/12/Premier-League-Logo-PNG-Iconic-English-Football-Emblem-Transparent-jpg.webp
+
+" alt="PL" style="height:42px;margin-right:10px;opacity:.9" />
+    <h1 class="text-gradient m-0">Premier League Hub</h1>
+</div>
 
 <!-- Navigation Tabs -->
 <ul class="nav nav-tabs justify-content-center mt-4">
@@ -19,32 +25,50 @@
     </li>
 </ul>
 
-<!-- Tab Content -->
 <div class="tab-content mt-4">
 
+    @* ----------------- PLAYERS TAB ----------------- *@
     @if (activeTab == "players")
     {
         <div>
-            <h4 class="text-info mb-3">Fantasy Premier League Players</h4>
+            <h4 class="text-info mb-3 text-center">Fantasy Premier League Players</h4>
 
             @if (players == null)
             {
-                <p>Loading player data...</p>
+                <p class="text-center">Loading player data...</p>
             }
             else
             {
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" id="topPlayersToggle" @bind="showTopPlayers" />
-                    <label class="form-check-label" for="topPlayersToggle">
-                        Show only Top 5 Players
-                    </label>
+                <!-- Filters -->
+                <div class="row g-3 align-items-end mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Search player</label>
+                        <input class="form-control" placeholder="Type a name..." @bind="searchText" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Position</label>
+                        <select class="form-select" @bind="positionFilter">
+                            <option value="0">All</option>
+                            <option value="1">Goalkeeper</option>
+                            <option value="2">Defender</option>
+                            <option value="3">Midfielder</option>
+                            <option value="4">Forward</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="topPlayersToggle" @bind="showTopPlayers" />
+                        <label class="form-check-label" for="topPlayersToggle">
+                            Show only Top 5 by points
+                        </label>
+                    </div>
                 </div>
 
+                <!-- Players Table -->
                 <table class="table table-hover table-bordered table-dark">
                     <thead>
                         <tr>
                             <th>Player</th>
-                            <th>Team ID</th>
+                            <th>Team</th>
                             <th>Position</th>
                             <th>Price (£m)</th>
                             <th>Total Points</th>
@@ -55,9 +79,15 @@
                     <tbody>
                         @foreach (var p in GetFilteredPlayers())
                         {
-                            <tr>
-                                <td>@p.web_name</td>
-                                <td>@p.team</td>
+                            <tr style="cursor:pointer" @onclick="() => ShowPlayerDetails(p)">
+                                <td class="d-flex align-items-center">
+                                    @if (!string.IsNullOrWhiteSpace(p.PhotoUrl))
+                                    {
+                                        <img src="@p.PhotoUrl" alt="@p.web_name" class="me-2 rounded" style="height:32px;width:25px;object-fit:cover;" />
+                                    }
+                                    <span>@p.web_name</span>
+                                </td>
+                                <td>@TeamNameFor(p)</td>
                                 <td>@p.Position</td>
                                 <td>@(p.now_cost / 10)</td>
                                 <td>@p.total_points</td>
@@ -70,13 +100,16 @@
             }
         </div>
     }
+
+    @* ----------------- TEAMS TAB ----------------- *@
     else if (activeTab == "teams")
     {
         <div>
-            <h4 class="text-info mb-3">Premier League Table</h4>
+            <h4 class="text-info mb-3 text-center">Premier League Table</h4>
+
             @if (teams == null)
             {
-                <p>Loading league table...</p>
+                <p class="text-center">Loading league table...</p>
             }
             else
             {
@@ -89,18 +122,26 @@
                             <th>Points</th>
                             <th>GF</th>
                             <th>GA</th>
+                            <th>GD</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var t in teams)
                         {
-                            <tr>
+                            <tr style="cursor:pointer" @onclick="() => ShowTeamDetails(t)">
                                 <td>@t.Position</td>
-                                <td>@t.TeamName</td>
+                                <td class="d-flex align-items-center">
+                                    @if (!string.IsNullOrWhiteSpace(t.CrestUrl))
+                                    {
+                                        <img src="@t.CrestUrl" alt="@t.TeamName" class="me-2" style="height:22px;width:22px;object-fit:contain;" />
+                                    }
+                                    <span>@t.TeamName</span>
+                                </td>
                                 <td>@t.PlayedGames</td>
                                 <td>@t.Points</td>
                                 <td>@t.GoalsFor</td>
                                 <td>@t.GoalsAgainst</td>
+                                <td>@t.GoalDifference</td>
                             </tr>
                         }
                     </tbody>
@@ -108,13 +149,16 @@
             }
         </div>
     }
+
+    @* ----------------- FIXTURES TAB ----------------- *@
     else if (activeTab == "fixtures")
     {
         <div>
-            <h4 class="text-info mb-3">Upcoming Fixtures</h4>
+            <h4 class="text-info mb-3 text-center">Upcoming Fixtures</h4>
+
             @if (fixtures == null)
             {
-                <p>Loading fixtures...</p>
+                <p class="text-center">Loading fixtures...</p>
             }
             else
             {
@@ -144,36 +188,147 @@
     }
 </div>
 
+@* ----------------- PLAYER MODAL ----------------- *@
+@if (selectedPlayer != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color:rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        @selectedPlayer.web_name (@selectedPlayer.Position)
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="ClosePlayerModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex">
+                        @if (!string.IsNullOrWhiteSpace(selectedPlayer.PhotoUrl))
+                        {
+                            <img src="@selectedPlayer.PhotoUrl" alt="@selectedPlayer.web_name" class="me-3 rounded" style="height:110px;width:88px;object-fit:cover;" />
+                        }
+                        <div>
+                            <p class="mb-1"><strong>Team:</strong> @TeamNameFor(selectedPlayer)</p>
+                            <p class="mb-1"><strong>Price:</strong> £@(selectedPlayer.now_cost / 10)m</p>
+                            <p class="mb-1"><strong>Total Points:</strong> @selectedPlayer.total_points</p>
+                            <p class="mb-1"><strong>Goals:</strong> @selectedPlayer.goals_scored</p>
+                            <p class="mb-0"><strong>Assists:</strong> @selectedPlayer.assists</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="ClosePlayerModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* ----------------- TEAM MODAL ----------------- *@
+@if (selectedTeam != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color:rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        @selectedTeam.TeamName
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseTeamModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center mb-3">
+                        @if (!string.IsNullOrWhiteSpace(selectedTeam.CrestUrl))
+                        {
+                            <img src="@selectedTeam.CrestUrl" alt="@selectedTeam.TeamName" class="me-3" style="height:42px;width:42px;object-fit:contain;" />
+                        }
+                        <div>
+                            <div><strong>Position:</strong> @selectedTeam.Position</div>
+                            <div><strong>Points:</strong> @selectedTeam.Points</div>
+                            <div><strong>Played:</strong> @selectedTeam.PlayedGames</div>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col"><strong>GF</strong><div>@selectedTeam.GoalsFor</div></div>
+                        <div class="col"><strong>GA</strong><div>@selectedTeam.GoalsAgainst</div></div>
+                        <div class="col"><strong>GD</strong><div>@selectedTeam.GoalDifference</div></div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(selectedTeam.Form))
+                    {
+                        <div class="mt-3"><strong>Form:</strong> @selectedTeam.Form</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseTeamModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Player>? players;
+    private List<FplTeam>? fplTeams;
     private List<TeamStanding>? teams;
     private List<Fixture>? fixtures;
+
     private string activeTab = "players";
 
-    // Boolean for toggle switch
+    // Filters
+    private string? searchText;
+    private int positionFilter = 0;        // 0 = all
     private bool showTopPlayers = false;
+
+    // Modal state
+    private Player? selectedPlayer;
+    private TeamStanding? selectedTeam;
 
     protected override async Task OnInitializedAsync()
     {
         var fplData = await FplService.GetFplDataAsync();
         players = fplData?.elements;
+        fplTeams = fplData?.teams;
 
         teams = await FootballDataService.GetStandingsAsync();
         fixtures = await FootballDataService.GetUpcomingFixturesAsync();
     }
 
-    private void SetTab(string tab)
-    {
-        activeTab = tab;
-    }
+    void SetTab(string tab) => activeTab = tab;
 
-    // Helper function for filtered player list
+    // Player helpers
     private IEnumerable<Player> GetFilteredPlayers()
     {
-        if (players == null)
-            return Enumerable.Empty<Player>();
+        if (players == null) return Enumerable.Empty<Player>();
 
-        var sorted = players.OrderByDescending(p => p.total_points);
-        return showTopPlayers ? sorted.Take(5) : sorted.Take(15);
+        IEnumerable<Player> query = players;
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            var s = searchText.Trim().ToLowerInvariant();
+            query = query.Where(p =>
+                (p.web_name ?? "").ToLowerInvariant().Contains(s) ||
+                (p.first_name ?? "").ToLowerInvariant().Contains(s) ||
+                (p.second_name ?? "").ToLowerInvariant().Contains(s));
+        }
+
+        if (positionFilter is >= 1 and <= 4)
+            query = query.Where(p => p.element_type == positionFilter);
+
+        query = query.OrderByDescending(p => p.total_points);
+
+        if (showTopPlayers) query = query.Take(5);
+        else query = query.Take(20);
+
+        return query;
     }
+
+    private string TeamNameFor(Player p)
+        => fplTeams?.FirstOrDefault(t => t.id == p.team)?.name ?? $"Team {p.team}";
+
+    // Player modal
+    private void ShowPlayerDetails(Player p) => selectedPlayer = p;
+    private void ClosePlayerModal() => selectedPlayer = null;
+
+    // Team modal
+    private void ShowTeamDetails(TeamStanding t) => selectedTeam = t;
+    private void CloseTeamModal() => selectedTeam = null;
 }
