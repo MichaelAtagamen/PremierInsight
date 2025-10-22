@@ -17,17 +17,41 @@ namespace PremierInsight.Data.Models
         public int assists { get; set; }
         public int minutes { get; set; }
         public int element_type { get; set; } // 1=GK, 2=DEF, 3=MID, 4=FWD
+        public string photo { get; set; } = ""; // Added for player images
 
-        //  New property that uses the enum
+        // Position display using enum
         public string Position => ((PlayerPosition)element_type).ToString();
+
+        // Optional: Enum form
+        public PlayerPosition PositionEnum => (PlayerPosition)element_type;
+
+        // Player face photo (FPL official source)
+        public string PhotoUrl
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(photo)) return "";
+                var cleaned = photo.Replace(".jpg", "");
+                return $"https://resources.premierleague.com/premierleague/photos/players/110x140/p{cleaned}.png";
+            }
+        }
+    }
+
+    // FPL API also provides team data (for lookups)
+    public class FplTeam
+    {
+        public int id { get; set; }
+        public string name { get; set; } = "";
+        public string short_name { get; set; } = "";
+        public int code { get; set; }
     }
 
     public class FplRoot
     {
         public List<Player> elements { get; set; } = new();
+        public List<FplTeam> teams { get; set; } = new();
     }
 
-    //  Enum for player position
     public enum PlayerPosition
     {
         Goalkeeper = 1,
